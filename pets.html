@@ -4,14 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PetPill | Pro Tracker</title>
+    
+    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2138/2138440.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <style>
         [x-cloak] { display: none !important; }
-        body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; }
-        input[type="time"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: auto; height: auto; color: transparent; background: transparent; }
+        body { 
+            -webkit-tap-highlight-color: transparent; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        }
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            width: auto; height: auto; color: transparent; background: transparent; cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900" x-data="petApp()" x-init="init()">
@@ -20,19 +31,31 @@
         <header class="flex justify-between items-center mb-8 pt-4">
             <div>
                 <h1 class="text-3xl font-black italic tracking-tighter text-indigo-600">PETPILL</h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Version 2.0 • Live Alerts</p>
             </div>
             <div class="flex space-x-2">
-                <button @click="requestNotify()" class="bg-slate-200 p-2 rounded-full text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg></button>
-                <button @click="showAddPet = true" class="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg">+ Pet</button>
+                <button @click="requestNotify()" class="bg-slate-200 p-2 rounded-full text-slate-500 hover:bg-indigo-100 hover:text-indigo-600 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </button>
+                <button @click="showAddPet = true" class="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg active:scale-95 transition">
+                    + Pet
+                </button>
             </div>
         </header>
 
         <div class="space-y-6">
             <template x-for="(pet, pIndex) in pets" :key="pIndex">
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden transition-all">
                     <div class="px-6 py-4 flex justify-between items-center border-b border-slate-50 bg-slate-50/50">
                         <h2 class="font-bold text-xl tracking-tight text-slate-700" x-text="pet.name"></h2>
-                        <button @click="openAddMed(pIndex)" class="text-indigo-600 font-bold text-xs uppercase bg-indigo-50 px-3 py-1 rounded-full">+ Add Med</button>
+                        <div class="flex items-center space-x-3">
+                            <button @click="deletePet(pIndex)" class="text-slate-300 hover:text-red-400 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                            <button @click="openAddMed(pIndex)" class="text-indigo-600 font-bold text-[10px] uppercase tracking-wider bg-indigo-50 px-3 py-1 rounded-full">+ Med</button>
+                        </div>
                     </div>
 
                     <div class="divide-y divide-slate-50">
@@ -41,18 +64,22 @@
                                 <div class="flex-1 pr-4">
                                     <div class="flex items-center space-x-2">
                                         <h3 class="font-bold text-lg leading-tight" :class="med.takenToday ? 'text-slate-400 line-through' : 'text-slate-800'" x-text="med.name"></h3>
-                                        <button @click="editMed(pIndex, mIndex)" class="text-indigo-300 hover:text-indigo-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                        <button @click="editMed(pIndex, mIndex)" class="text-indigo-300 hover:text-indigo-600 transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        </button>
                                     </div>
                                     <div class="flex items-center space-x-2 mt-1">
                                         <span class="text-[10px] font-mono bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-bold" x-text="formatTime(med.time)"></span>
-                                        <p class="text-sm text-slate-400" x-text="med.notes"></p>
+                                        <p class="text-sm text-slate-400 italic" x-text="med.notes"></p>
                                     </div>
                                 </div>
 
                                 <button @click="toggleMed(pIndex, mIndex)" 
                                     class="w-16 h-16 rounded-[2rem] flex items-center justify-center transition-all shadow-md active:scale-90"
                                     :class="med.takenToday ? 'bg-green-500 text-white shadow-green-200' : 'bg-white border-2 border-slate-100 text-slate-200'">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
                                 </button>
                             </div>
                         </template>
@@ -60,6 +87,12 @@
                 </div>
             </template>
         </div>
+
+        <template x-if="pets.length === 0">
+            <div class="text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200 mt-10">
+                <p class="text-slate-400 font-medium px-10">You haven't added any pets yet. Tap the button above to start!</p>
+            </div>
+        </template>
     </div>
 
     <div x-cloak x-show="showAddMed" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end">
@@ -67,7 +100,7 @@
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-black" x-text="isEditing ? 'Edit Med' : 'New Med'"></h2>
                 <template x-if="isEditing">
-                    <button @click="deleteMed()" class="text-red-500 text-xs font-bold uppercase tracking-widest">Delete</button>
+                    <button @click="deleteMed()" class="text-red-500 text-xs font-bold uppercase tracking-widest bg-red-50 px-3 py-1 rounded-full">Delete</button>
                 </template>
             </div>
             
@@ -90,10 +123,10 @@
                 </div>
 
                 <template x-if="noteChoice === 'Other'">
-                    <input type="text" x-model="customNote" placeholder="Custom note..." class="w-full p-4 bg-indigo-50 border-2 border-indigo-100 rounded-2xl outline-none">
+                    <input type="text" x-model="customNote" placeholder="Custom instructions..." class="w-full p-4 bg-indigo-50 border-2 border-indigo-100 rounded-2xl outline-none">
                 </template>
 
-                <button @click="saveMed()" class="w-full bg-indigo-600 text-white p-5 rounded-[2rem] font-bold text-xl shadow-xl active:bg-indigo-700" x-text="isEditing ? 'Update Med' : 'Save Med'"></button>
+                <button @click="saveMed()" class="w-full bg-indigo-600 text-white p-5 rounded-[2rem] font-bold text-xl shadow-xl active:bg-indigo-700 transition-colors" x-text="isEditing ? 'Update Med' : 'Add Medication'"></button>
                 <button @click="closeModals()" class="w-full text-slate-400 font-bold py-2">Cancel</button>
             </div>
         </div>
@@ -111,6 +144,13 @@
     </div>
 
     <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed', err));
+            });
+        }
+
         function petApp() {
             return {
                 pets: [],
@@ -125,29 +165,45 @@
                 newMed: { name: '', time: '08:00', notes: '', takenToday: false, lastDate: '' },
 
                 init() {
-                    const saved = localStorage.getItem('petpill_v5');
+                    const saved = localStorage.getItem('petpill_final_v1');
                     if (saved) {
                         this.pets = JSON.parse(saved);
                         this.checkDateReset();
                     }
+                    // Heartbeat check every 60 seconds
                     setInterval(() => this.checkScheduledMeds(), 60000);
                 },
 
                 requestNotify() {
-                    if (!("Notification" in window)) return alert("Not supported");
-                    Notification.requestPermission().then(p => { if (p === "granted") new Notification("Notifications Enabled!"); });
+                    if (!("Notification" in window)) return alert("Notifications not supported in this browser.");
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            new Notification("PetPill Active!", { body: "You will now receive alerts for medications." });
+                        }
+                    });
                 },
 
                 checkScheduledMeds() {
                     const now = new Date();
-                    const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-                    this.pets.forEach(pet => pet.meds.forEach(med => {
-                        if (med.time === currentTime && !med.takenToday) this.fireNotification(pet.name, med.name);
-                    }));
+                    const currentTime = now.getHours().toString().padStart(2, '0') + ":" + 
+                                      now.getMinutes().toString().padStart(2, '0');
+
+                    this.pets.forEach(pet => {
+                        pet.meds.forEach(med => {
+                            if (med.time === currentTime && !med.takenToday) {
+                                this.fireNotification(pet.name, med.name);
+                            }
+                        });
+                    });
                 },
 
                 fireNotification(petName, medName) {
-                    if (Notification.permission === "granted") new Notification(`💊 Time for ${petName}`, { body: `Give ${medName} now.` });
+                    if (Notification.permission === "granted") {
+                        new Notification(`💊 Time for ${petName}`, { body: `Give ${medName} now.` });
+                    } else {
+                        // Fallback alert for browsers/phones without notification permission
+                        alert(`TIME FOR ${petName.toUpperCase()}: ${medName}`);
+                    }
                 },
 
                 formatTime(timeStr) {
@@ -167,11 +223,18 @@
                     this.showAddPet = false;
                 },
 
+                deletePet(index) {
+                    if(confirm(`Delete ${this.pets[index].name} and all their meds?`)) {
+                        this.pets.splice(index, 1);
+                        this.save();
+                    }
+                },
+
                 openAddMed(index) {
                     this.activePetIndex = index;
                     this.isEditing = false;
-                    this.showAddMed = true;
                     this.newMed = { name: '', time: '08:00', notes: '', takenToday: false, lastDate: '' };
+                    this.showAddMed = true;
                 },
 
                 editMed(pIdx, mIdx) {
@@ -188,6 +251,7 @@
                 saveMed() {
                     if(!this.newMed.name) return;
                     this.newMed.notes = this.noteChoice === 'Other' ? this.customNote : this.noteChoice;
+                    
                     if (this.isEditing) {
                         this.pets[this.activePetIndex].meds[this.activeMedIndex] = { ...this.newMed };
                     } else {
@@ -214,12 +278,22 @@
 
                 checkDateReset() {
                     const today = new Date().toDateString();
-                    this.pets.forEach(p => p.meds.forEach(m => { if(m.lastDate !== today) m.takenToday = false; }));
+                    this.pets.forEach(p => p.meds.forEach(m => {
+                        if(m.lastDate !== today) m.takenToday = false;
+                    }));
                     this.save();
                 },
 
-                save() { localStorage.setItem('petpill_v5', JSON.stringify(this.pets)); },
-                closeModals() { this.showAddMed = false; this.showAddPet = false; this.isEditing = false; this.customNote = ''; }
+                save() { 
+                    localStorage.setItem('petpill_final_v1', JSON.stringify(this.pets)); 
+                },
+                
+                closeModals() { 
+                    this.showAddMed = false; 
+                    this.showAddPet = false; 
+                    this.isEditing = false; 
+                    this.customNote = ''; 
+                }
             }
         }
     </script>

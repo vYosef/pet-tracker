@@ -94,7 +94,11 @@
             </div>
         </template>
     </div>
-
+    <div class="mt-10 p-4 bg-slate-200 rounded-2xl text-[10px] font-mono text-slate-500">
+        <p>Permission: <span class="font-bold" x-text="Notification.permission"></span></p>
+        <p>Last Heartbeat: <span class="font-bold" x-text="new Date().toLocaleTimeString()"></span></p>
+        <p>Meds Found: <span class="font-bold" x-text="pets.reduce((acc, p) => acc + p.meds.length, 0)"></span></p>
+    </div>
     <div x-cloak x-show="showAddMed" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end">
         <div @click.away="closeModals()" class="bg-white w-full rounded-t-[3rem] p-8 shadow-2xl transition-all" x-transition:enter="translate-y-full" x-transition:enter-end="translate-y-0">
             <div class="flex justify-between items-center mb-6">
